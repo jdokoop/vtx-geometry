@@ -320,7 +320,11 @@ SvxTGeo::ReadParFile(const char *filename)
   }
 
   for (int lyr=0; lyr<fNLayers; lyr++)
+  {
+    cout << "Layer " << lyr << endl;
     for (int ldr=0; ldr<fNLadders[lyr]; ldr++)
+    {
+      cout << "  Ladder " << ldr << endl;
       for (int sns=0; sns<fNSensors[lyr]; sns++)
       {
         int i = indx[lyr][ldr][sns];
@@ -334,7 +338,34 @@ SvxTGeo::ReadParFile(const char *filename)
         sensors[i].phi   = r2d*TMath::ATan2(s.R(0,1), s.R(0,0));
         sensors[i].theta = r2d*TMath::ATan2(s.R(1,2), s.R(2,2));
         sensors[i].psi   = 0;
+
+        float x = s.x;
+        float y = s.y;
+        float z = s.z;
+
+        float dx = sensors[i].xhw;
+        float dy = sensors[i].yhw;
+        float dz = sensors[i].zhw;
+
+        float sensorPhi = TMath::ATan2(y,x);
+        if(sensorPhi < -0.5*TMath::Pi())
+        {
+          sensorPhi = sensorPhi + 2*TMath::Pi();
+        }
+        else if(sensorPhi > 1.5*TMath::Pi())
+        {
+          sensorPhi = sensorPhi - 2*TMath::Pi();
+        }
+
+        float sensorEta = TMath::ATanH(z/TMath::Sqrt(x*x + y*y + z*z));
+
+        cout << "   Sensor " << sns << "  PHI: " << sensorPhi << "   (" << TMath::ATan2(y-dy, x+dx) << ", " << TMath::ATan2(y-dy, x-dx) << ")" << endl;
+        cout << "             ETA: " << sensorEta << " (" << TMath::ATanH((z-dz)/TMath::Sqrt(x*x + y*y + (z-dz)*(z-dz))) << ", " << TMath::ATanH((z+dz)/TMath::Sqrt(x*x + y*y + (z+dz)*(z+dz))) << ")" << endl << endl;
       }
+      cout << endl;
+    }
+  }
+    
 
   return;
 }
